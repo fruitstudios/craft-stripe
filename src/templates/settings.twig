@@ -1,0 +1,43 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.lightSwitchField({
+	first: true,
+    label: "Live Mode",
+    name: 'liveMode',
+    on: settings.liveMode
+}) }}
+
+{{ forms.textField({
+    label: "Default Fee (%)",
+    name: 'fee',
+    placeholder: '0',
+    value: settings.fee,
+}) }}
+
+{{ forms.textField({
+    label: "Secret Key (Test)",
+    name: 'testSecretKey',
+    placeholder: 'sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.testSecretKey
+}) }}
+
+{{ forms.textField({
+    label: "Publishable Key (Test)",
+    name: 'testPublishableKey',
+    placeholder: 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.testPublishableKey
+}) }}
+
+{{ forms.textField({
+    label: "Secret Key (Live)",
+    name: 'liveSecretKey',
+    placeholder: 'sk_live_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.liveSecretKey
+}) }}
+
+{{ forms.textField({
+    label: "Publishable Key (Live)",
+    name: 'livePublishableKey',
+    placeholder: 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.livePublishableKey
+}) }}

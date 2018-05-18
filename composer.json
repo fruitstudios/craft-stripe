@@ -1,0 +1,49 @@
+{
+    "name": "fruitstudios/stripe",
+    "description": "Follow, Favourite, Bookmark, Like & Subscribe.",
+    "type": "craft-plugin",
+    "version": "1.0.7",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "stripe",
+        "follow",
+        "favourite",
+        "bookmark",
+        "like",
+        "subscribe"
+    ],
+    "support": {
+        "docs": "https://github.com/fruitstudios/craft-stripe/blob/master/README.md",
+        "issues": "https://github.com/fruitstudios/craft-stripe/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Fruit Studios",
+            "homepage": "https://fruitstudios.co.uk"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1"
+    },
+    "autoload": {
+        "psr-4": {
+          "fruitstudios\\stripe\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Stripe",
+        "handle": "stripe",
+        "hasCpSettings": false,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/fruitstudios/craft-stripe/master/CHANGELOG.md",
+        "components": {
+            "listService": "fruitstudios\\stripe\\services\\ListService",
+            "subscriptionService": "fruitstudios\\stripe\\services\\SubscriptionService"
+        },
+        "class": "fruitstudios\\stripe\\Stripe"
+    }
+}
