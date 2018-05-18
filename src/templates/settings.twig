@@ -2,42 +2,70 @@
 
 {{ forms.lightSwitchField({
 	first: true,
-    label: "Live Mode",
+    label: "Live Mode"|t('stripe'),
     name: 'liveMode',
     on: settings.liveMode
 }) }}
 
+<hr>
+
 {{ forms.textField({
-    label: "Default Fee (%)",
+    label: "Test Secret Key"|t('stripe'),
+    name: 'testSecretKey',
+    placeholder: 'sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.testSecretKey,
+    errors: settings.getErrors('testSecretKey') ?? null
+}) }}
+
+{{ forms.textField({
+    label: "Test Publishable Key"|t('stripe'),
+    name: 'testPublishableKey',
+    placeholder: 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.testPublishableKey,
+    errors: settings.getErrors('testPublishableKey') ?? null
+}) }}
+
+{{ forms.textField({
+    label: "Test Connect Client ID"|t('stripe'),
+    name: 'testConnectClientId',
+    placeholder: 'ca_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.testConnectClientId,
+    errors: settings.getErrors('testConnectClientId') ?? null
+}) }}
+
+<hr>
+
+{{ forms.textField({
+    label: "Live Secret Key"|t('stripe'),
+    name: 'liveSecretKey',
+    placeholder: 'sk_live_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.liveSecretKey,
+    errors: settings.getErrors('liveSecretKey') ?? null
+}) }}
+
+{{ forms.textField({
+    label: "Live Publishable Key"|t('stripe'),
+    name: 'livePublishableKey',
+    placeholder: 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.livePublishableKey,
+    errors: settings.getErrors('livePublishableKey') ?? null
+}) }}
+
+{{ forms.textField({
+    label: "Live Connect Client ID"|t('stripe'),
+    name: 'liveConnectClientId',
+    placeholder: 'ca_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.liveConnectClientId,
+    errors: settings.getErrors('liveConnectClientId') ?? null
+}) }}
+
+<hr>
+
+{{ forms.textField({
+    label: "Default Fee (%)"|t('stripe'),
+    instructions: 'Set the default fee you are going to charge for connected account charges.'|t('stripe'),
     name: 'fee',
     placeholder: '0',
     value: settings.fee,
-}) }}
-
-{{ forms.textField({
-    label: "Secret Key (Test)",
-    name: 'testSecretKey',
-    placeholder: 'sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX',
-    value: settings.testSecretKey
-}) }}
-
-{{ forms.textField({
-    label: "Publishable Key (Test)",
-    name: 'testPublishableKey',
-    placeholder: 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXXX',
-    value: settings.testPublishableKey
-}) }}
-
-{{ forms.textField({
-    label: "Secret Key (Live)",
-    name: 'liveSecretKey',
-    placeholder: 'sk_live_XXXXXXXXXXXXXXXXXXXXXXXXX',
-    value: settings.liveSecretKey
-}) }}
-
-{{ forms.textField({
-    label: "Publishable Key (Live)",
-    name: 'livePublishableKey',
-    placeholder: 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXXX',
-    value: settings.livePublishableKey
+    errors: settings.getErrors('fee') ?? null
 }) }}

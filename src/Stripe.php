@@ -2,9 +2,9 @@
 namespace fruitstudios\stripe;
 
 use fruitstudios\stripe\models\Settings;
-use fruitstudios\stripe\services\ConnectedAccounts;
 use fruitstudios\stripe\services\Charges;
-use fruitstudios\stripe\variables\StripeVariable as StripeService;
+use fruitstudios\stripe\services\Connect;
+use fruitstudios\stripe\variables\StripeVariable;
 
 use Craft;
 use craft\base\Plugin;
@@ -40,7 +40,7 @@ class Stripe extends Plugin
 
         $this->setComponents([
             'charges' => Charges::class,
-            'connectedAccounts' => ConnectedAccounts::class,
+            'connect' => Connect::class,
         ]);
 
         Event::on(

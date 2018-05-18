@@ -9,11 +9,30 @@ use Craft;
 use craft\base\Component;
 use craft\db\Query;
 
-class ConnectedAccounts extends Component
+class StripeService extends Component
 {
-
     // Public Methods
     // =========================================================================
+
+    public function getConnectAuthorizeUrl()
+    {
+        $connectClientId = $this->getConnectClientId();
+        $redirectUrl = UrlHelper::siteUrl('actions/findarace/stripe/connectAuthorization', null, 'https');
+        $state = '';
+
+        $url = 'https://connect.stripe.com/oauth/authorize?response_type=code&scope=read_write';
+        $url .= '&client_id='.$connectClientId;
+        $url .= '&redirect_uri='.$redirectUrl;
+        $url .= '&state='.$state;
+        return $url;
+    }
+
+
+
+
+
+
+
 
     public function createSubscription($attributes = [])
     {

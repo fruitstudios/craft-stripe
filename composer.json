@@ -1,8 +1,8 @@
 {
     "name": "fruitstudios/stripe",
-    "description": "Follow, Favourite, Bookmark, Like & Subscribe.",
+    "description": "Developer tools for Stripe inc Charges & Connected Accounts.",
     "type": "craft-plugin",
-    "version": "1.0.7",
+    "version": "1.0.0",
     "keywords": [
         "craft",
         "cms",
@@ -37,7 +37,7 @@
     "extra": {
         "name": "Stripe",
         "handle": "stripe",
-        "hasCpSettings": false,
+        "hasCpSettings": true,
         "hasCpSection": false,
         "changelogUrl": "https://raw.githubusercontent.com/fruitstudios/craft-stripe/master/CHANGELOG.md",
         "components": {

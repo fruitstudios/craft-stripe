@@ -45,6 +45,49 @@ class StripeController extends Controller
         // return $this->_handleSuccessfulResponse($subscription);
     }
 
+
+    // public function actionConnectAuthorization()
+    // {
+    //     $authorizationCode = craft()->request->getParam('code', false);
+    //     $error = craft()->request->getParam('error', false);
+
+    //     $state = explode(',', craft()->request->getParam('state', ''));
+
+    //     if(!$error)
+    //     {
+    //         craft()->findarace_stripe->authorizeConnect($authorizationCode, $this->getUser());
+
+    //     }
+    //     $this->redirect('organiser/integrate');
+    // }
+
+    // public function actionConnectDeAuthorization()
+    // {
+    //     // Craft Checks
+    //     $this->requireLogin();
+    //     $this->requireAjaxRequest();
+
+    //     // User
+    //     $user = $this->getUser();
+
+    //     // Deauthorize
+    //     $result = craft()->findarace_stripe->deauthorizeConnect($user);
+    //     if($result)
+    //     {
+    //         $this->returnJson([
+    //             'success' => true,
+    //             'message' => 'Account Disconnected'
+    //         ]);
+    //     }
+    //     else
+    //     {
+    //         $this->returnJson([
+    //             'success' => false,
+    //             'message' => 'Account Could Not Be Disconnected'
+    //         ]);
+    //     }
+    // }
+
     // Private Methods
     // =========================================================================
 

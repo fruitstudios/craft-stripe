@@ -59,7 +59,7 @@ class Install extends Migration
     {
         $tablesCreated = false;
 
-        $tableSchema = Craft::$app->db->schema->getTableSchema('{{%stripe}}');
+        $tableSchema = Craft::$app->db->schema->getTableSchema('{{%stripe_connectedaccounts}}');
         if($tableSchema === null)
         {
             $tablesCreated = true;

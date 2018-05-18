@@ -1,6 +1,6 @@
 # Stripe plugin for Craft CMS 3.x
 
-Follow, Favourite, Bookmark, Like & Subscribe users to lists.
+Developer tools for Stripe inc Charges & Connected Accounts.
 
 Docs coming soon...
 

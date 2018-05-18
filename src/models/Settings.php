@@ -10,10 +10,13 @@ class Settings extends Model
 
     public $liveMode = false;
 
-    public $testSecretKey = '';
-    public $testPublishableKey = '';
-    public $liveSecretKey = '';
-    public $livePublishableKey = '';
+    public $testSecretKey;
+    public $testPublishableKey;
+    public $testConnectClientId;
+
+    public $liveSecretKey;
+    public $livePublishableKey;
+    public $liveConnectClientId;
 
     public $fee = 0;
 
@@ -23,7 +26,17 @@ class Settings extends Model
     public function rules()
     {
         return [
-            [['testSecretKey', 'testPublishableKey', 'liveSecretKey', 'livePublishableKey'], 'required'],
+            [
+                [
+                    'testSecretKey',
+                    'testPublishableKey',
+                    'testConnectClientId',
+                    'liveSecretKey',
+                    'livePublishableKey',
+                    'liveConnectClientId'
+                ],
+                'string'
+            ],
             ['fee', 'double', 'min' => 0, 'max' => 99.99],
             ['fee', 'default', 'value' => 0],
             ['liveMode', 'default', 'value' => false],
