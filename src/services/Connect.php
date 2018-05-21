@@ -4,6 +4,7 @@ namespace fruitstudios\stripe\services;
 use fruitstudios\stripe\Stripe;
 use fruitstudios\stripe\models\ConnectedAccount;
 use fruitstudios\stripe\records\ConnectedAccount as ConnectedAccountnRecord;
+use fruitstudios\stripe\events\ConnectedAccountEvent;
 
 use Craft;
 use craft\base\Component;
@@ -77,9 +78,9 @@ class StripeService extends Component
 
         $connectedAccountModel = $this->_createConnectedAccount($connectedAccountRecord);
 
-        // $this->trigger(self::EVENT_STRIPE_ACCOUNT_CONNECTED, new ConnectedAccountEvent([
-        //     'connectedAccount' => $connectedAccountModel
-        // ]));
+        $this->trigger(self::EVENT_STRIPE_ACCOUNT_CONNECTED, new ConnectedAccountEvent([
+            'connectedAccount' => $connectedAccountModel
+        ]));
 
         return true;
     }
@@ -94,9 +95,9 @@ class StripeService extends Component
                 $connectedAccountModel = $this->_createConnectedAccount($connectedAccountRecord);
                 $connectedAccountRecord->delete();
 
-                // $this->trigger(self::EVENT_STRIPE_ACCOUNT_DISCONNECTED, new ConnectedAccountEvent([
-                //     'connectedAccount' => $connectedAccountModel
-                // ]));
+                $this->trigger(self::EVENT_STRIPE_ACCOUNT_DISCONNECTED, new ConnectedAccountEvent([
+                    'connectedAccount' => $connectedAccountModel
+                ]));
 
             } catch (\StaleObjectException $e) {
                 Craft::error($e->getMessage(), __METHOD__);
