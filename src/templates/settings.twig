@@ -33,6 +33,7 @@
     errors: settings.getErrors('testConnectClientId') ?? null
 }) }}
 
+
 <hr>
 
 {{ forms.textField({
@@ -68,4 +69,20 @@
     placeholder: '0',
     value: settings.fee,
     errors: settings.getErrors('fee') ?? null
+}) }}
+
+{{ forms.textField({
+    label: "Connect Success Path"|t('stripe'),
+    name: 'connectSuccessPath',
+    placeholder: 'ca_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.connectSuccessPath,
+    errors: settings.getErrors('connectSuccessPath') ?? null
+}) }}
+
+{{ forms.textField({
+    label: "Connect Failure Path"|t('stripe'),
+    name: 'connectFailurePath',
+    placeholder: 'ca_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.connectFailurePath,
+    errors: settings.getErrors('connectFailurePath') ?? null
 }) }}

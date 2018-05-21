@@ -7,131 +7,96 @@ use fruitstudios\stripe\records\ConnectedAccount as ConnectedAccountnRecord;
 
 use Craft;
 use craft\base\Component;
+use craft\base\ElementInterface;
 use craft\db\Query;
+
+use GuzzleHttp\Client;
+use Stripe\Stripe as StripeApi;
 
 class StripeService extends Component
 {
     // Public Methods
     // =========================================================================
 
-    public function getConnectAuthorizeUrl()
+    public function createConnectedAccount($code, ElementInterface $owner)
     {
-        $connectClientId = $this->getConnectClientId();
-        $redirectUrl = UrlHelper::siteUrl('actions/findarace/stripe/connectAuthorization', null, 'https');
-        $state = '';
-
-        $url = 'https://connect.stripe.com/oauth/authorize?response_type=code&scope=read_write';
-        $url .= '&client_id='.$connectClientId;
-        $url .= '&redirect_uri='.$redirectUrl;
-        $url .= '&state='.$state;
-        return $url;
-    }
-
-
-
-
-
-
-
-
-    public function createSubscription($attributes = [])
-    {
-        // $subscription = new Subscription();
-        // $subscription->setAttributes($attributes);
-        return $this->_createSubscription($attributes);
-    }
-
-    public function getSubscription(array $criteria = null)
-    {
-        $subscriptionRecord = SubscriptionRecord::findOne($criteria);
-        return $this->_createSubscription($subscriptionRecord);
-    }
-
-    public function getSubscriptions(array $criteria = [], array $select = null)
-    {
-        if($select)
+        $secretKey = Stripe::$plugin->getSettings()->getSecretKey();
+        if(!$secretKey)
         {
-            return (new Query())
-                ->select($select)
-                ->from([SubscriptionRecord::tableName()])
-                ->where($criteria)
-                ->all();
+            return false;
         }
-        else
-        {
-            $subscriptionRecords = SubscriptionRecord::find()
-                ->where($criteria)
-                ->all();
 
-            $subscriptionModels = [];
-            if($subscriptionRecords)
+        try {
+
+            $client = new Client();
+            $request = $client->post('https://connect.stripe.com/oauth/token', false, [
+                'client_secret' => $secretKey,
+                'code' => $code,
+                'grant_type' => 'authorization_code'
+            ]);
+
+            $response = $request->send();
+            if($response && $response->isSuccessful())
             {
-                foreach ($subscriptionRecords as $subscriptionRecord)
-                {
-                    $subscriptionModels[] = $this->_createSubscription($subscriptionRecord);
-                }
+                return $this->_createConnectedAccount([
+                    'ownerId' => $owner->id,
+                    'settings' => $response->json(),
+                ]);
             }
-            return $subscriptionModels;
+            return false;
+
+        } catch (\Exception $e) {
+            return $e;
         }
     }
 
-    public function getSubscriptionsColumn(array $criteria = [], string $column)
+    public function getConnectedAccount(ElementInterface $owner)
     {
-        return (new Query())
-            ->select($column)
-            ->from([SubscriptionRecord::tableName()])
-            ->where($criteria)
-            ->column();
+        $connectedAccountRecord = ConnectedAccountRecord::findOne($owner->id);
+        return $this->_createConnectedAccount($connectedAccountRecord);
     }
 
-    public function saveSubscription(Subscription $subscription)
+    public function saveConnectedAccount(ConnectedAccount $connectedAccount)
     {
-        if (!$subscription->validate()) {
-            Craft::info('Subscription not saved due to validation error.', __METHOD__);
+        if (!$connectedAccount->validate()) {
+            Craft::info('Connected Account not saved due to validation error.', __METHOD__);
             return false;
         }
 
-        $subscriptionRecord = SubscriptionRecord::findOne([
-            'ownerId' => $subscription->ownerId,
-            'elementId' => $subscription->elementId,
-            'list' => $subscription->list,
-            'siteId' => $subscription->siteId
-        ]);
-
-        if($subscriptionRecord) {
-            $subscription = $this->_createSubscription($subscriptionRecord);
-            return true;
+        $connectedAccountRecord = ConnectedAccountRecord::findOne($connectedAccount->ownerId);
+        if(!$connectedAccountRecord)
+        {
+            $connectedAccountRecord = new ConnectedAccountRecord();
         }
 
-        $subscriptionRecord = new SubscriptionRecord();
-        $subscriptionRecord->setAttributes($subscription->getAttributes(), false);
-        if(!$subscriptionRecord->save(false))
+        $connectedAccountRecord->setAttributes($connectedAccount->getAttributes(), false);
+        if(!$connectedAccountRecord->save(false))
         {
             return false;
         }
 
-        $subscriptionModel = $this->_createSubscription($subscriptionRecord);
+        $connectedAccountModel = $this->_createConnectedAccount($connectedAccountRecord);
 
-        $this->trigger(self::EVENT_ADDED_TO_LIST, new SubscriptionEvent([
-            'subscription' => $subscriptionModel
-        ]));
+        // $this->trigger(self::EVENT_STRIPE_ACCOUNT_CONNECTED, new ConnectedAccountEvent([
+        //     'connectedAccount' => $connectedAccountModel
+        // ]));
 
         return true;
     }
 
-    public function deleteSubscription($subscriptionId)
+    public function deleteConnectedAccount($connectedAccountId)
     {
-        $subscriptionRecord = SubscriptionRecord::findOne($subscriptionId);
+        $connectedAccountRecord = ConnectedAccountRecord::findOne($connectedAccountId);
 
-        if($subscriptionRecord) {
+        if($connectedAccountRecord) {
             try {
 
-                $subscriptionModel = $this->_createSubscription($subscriptionRecord);
-                $subscriptionRecord->delete();
+                $connectedAccountModel = $this->_createConnectedAccount($connectedAccountRecord);
+                $connectedAccountRecord->delete();
 
-                $this->trigger(self::EVENT_REMOVED_FROM_LIST, new SubscriptionEvent([
-                    'subscription' => $subscriptionModel
-                ]));
+                // $this->trigger(self::EVENT_STRIPE_ACCOUNT_DISCONNECTED, new ConnectedAccountEvent([
+                //     'connectedAccount' => $connectedAccountModel
+                // ]));
 
             } catch (\StaleObjectException $e) {
                 Craft::error($e->getMessage(), __METHOD__);
@@ -148,26 +113,24 @@ class StripeService extends Component
     // Private Methods
     // =========================================================================
 
-    private function _createSubscription($config = null)
+    private function _createConnectedAccount($config = null)
     {
         if (!$config) {
             return null;
         }
 
-        if($config instanceof Subscription)
+        if($config instanceof ConnectedAccount)
         {
-            $config = $subscriptionRecord->toArray([
+            $config = $connectedAccountRecord->toArray([
                 'id',
                 'ownerId',
-                'elementId',
-                'siteId',
-                'list',
+                'settings',
                 'dateCreated'
             ]);
         }
 
-        $subscription = new Subscription($config);
-        return $subscription;
+        $connectedAccount = new ConnectedAccount($config);
+        return $connectedAccount;
     }
 
 
