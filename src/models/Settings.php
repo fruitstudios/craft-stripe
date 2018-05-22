@@ -103,7 +103,7 @@ class Settings extends Model
 
     public function getFeeString()
     {
-        return rtrim((string) $this->fee, '.00').'%';
+        return (string) $this->fee.'%';
     }
 
     public function getConnectOauthUrl(ElementInterface $owner)

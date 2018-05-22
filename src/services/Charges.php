@@ -2,19 +2,22 @@
 namespace fruitstudios\stripe\services;
 
 use fruitstudios\stripe\Stripe;
+use fruitstudios\stripe\helpers\StripeHelper;
 
 use Craft;
 use craft\base\Component;
 
 use Stripe\Stripe as StripeApi;
+use Stripe\Charge as StripeCharge;
 
-class Lists extends Component
+
+class Charges extends Component
 {
 
     // Public Methods
     // =========================================================================
 
-    public function makePayment($charge, $connectedAccount = null)
+    public function charge($charge, $connectedAccount = null)
     {
         $secretKey = Stripe::$plugin->getSettings()->getSecretKey();
         if(!$secretKey)
@@ -22,27 +25,23 @@ class Lists extends Component
             return false;
         }
 
-        try {
+        StripeApi::setApiKey($secretKey);
 
-            StripeApi::setApiKey($secretKey);
+        if($connectedAccount)
+        {
+            $feePercent = Stripe::$plugin->getSettings()->fee ?? 0;
+            $charge['application_fee'] = StripeHelper::getPercentageValue($charge['amount'], $feePercent);
 
-            if($connectedAccount)
-            {
-                $payment = StripeApi\Charge::create($charge, [
-                    'stripe_account' => $connectedAccount->getAccountId()
-                ]);
-            }
-            else
-            {
-                $payment = StripeApi\Charge::create($charge);
-            }
-
-            return $payment;
-
-        } catch (\Exception $e) {
-
-            return false;
-
+            $payment = StripeCharge::create($charge, [
+                'stripe_account' => $connectedAccount->getAccountId()
+            ]);
         }
+        else
+        {
+            $payment = StripeCharge::create($charge);
+        }
+
+        return $payment;
+
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace fruitstudios\listit\events;
+namespace fruitstudios\stripe\events;
 
 use yii\base\Event;
 

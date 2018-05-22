@@ -3,57 +3,47 @@ namespace fruitstudios\stripe\services;
 
 use fruitstudios\stripe\Stripe;
 use fruitstudios\stripe\models\ConnectedAccount;
-use fruitstudios\stripe\records\ConnectedAccount as ConnectedAccountnRecord;
+use fruitstudios\stripe\records\ConnectedAccount as ConnectedAccountRecord;
+
 use fruitstudios\stripe\events\ConnectedAccountEvent;
 
 use Craft;
 use craft\base\Component;
 use craft\base\ElementInterface;
 use craft\db\Query;
+use craft\helpers\Json;
 
 use GuzzleHttp\Client;
-use Stripe\Stripe as StripeApi;
 
-class StripeService extends Component
+class Connect extends Component
 {
+
+    // Constants
+    // =========================================================================
+
+    const EVENT_STRIPE_ACCOUNT_CONNECTED = 'stripeAccountConnected';
+    const EVENT_STRIPE_ACCOUNT_DISCONNECTED = 'stripeAccountDisconnected';
+
+
     // Public Methods
     // =========================================================================
 
-    public function createConnectedAccount($code, ElementInterface $owner)
+    public function createConnectedAccount($attributes = [])
     {
-        $secretKey = Stripe::$plugin->getSettings()->getSecretKey();
-        if(!$secretKey)
-        {
-            return false;
-        }
-
-        try {
-
-            $client = new Client();
-            $request = $client->post('https://connect.stripe.com/oauth/token', false, [
-                'client_secret' => $secretKey,
-                'code' => $code,
-                'grant_type' => 'authorization_code'
-            ]);
-
-            $response = $request->send();
-            if($response && $response->isSuccessful())
-            {
-                return $this->_createConnectedAccount([
-                    'ownerId' => $owner->id,
-                    'settings' => $response->json(),
-                ]);
-            }
-            return false;
-
-        } catch (\Exception $e) {
-            return $e;
-        }
+        return $this->_createConnectedAccount($attributes);
     }
 
-    public function getConnectedAccount(ElementInterface $owner)
+    public function getConnectedAccount($idOrParams)
     {
-        $connectedAccountRecord = ConnectedAccountRecord::findOne($owner->id);
+        $connectedAccountRecord = ConnectedAccountRecord::findOne($idOrParams);
+        return $this->_createConnectedAccount($connectedAccountRecord);
+    }
+
+    public function getConnectedAccountByOwner(ElementInterface $owner)
+    {
+        $connectedAccountRecord = ConnectedAccountRecord::findOne([
+            'ownerId' => $owner->id
+        ]);
         return $this->_createConnectedAccount($connectedAccountRecord);
     }
 
@@ -64,13 +54,19 @@ class StripeService extends Component
             return false;
         }
 
-        $connectedAccountRecord = ConnectedAccountRecord::findOne($connectedAccount->ownerId);
-        if(!$connectedAccountRecord)
+        $connectedAccountRecord = ConnectedAccountRecord::findOne([
+            'ownerId' => $connectedAccount->ownerId
+        ]);
+        if($connectedAccountRecord)
+        {
+            $connectedAccountRecord->settings = $connectedAccount->settings;
+        }
+        else
         {
             $connectedAccountRecord = new ConnectedAccountRecord();
+            $connectedAccountRecord->setAttributes($connectedAccount->getAttributes(), false);
         }
 
-        $connectedAccountRecord->setAttributes($connectedAccount->getAttributes(), false);
         if(!$connectedAccountRecord->save(false))
         {
             return false;

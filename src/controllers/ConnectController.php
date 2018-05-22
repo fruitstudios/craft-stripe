@@ -9,8 +9,7 @@ use fruitstudios\stripe\services\Charges;
 use Craft;
 use craft\base\Element;
 use craft\web\Controller;
-
-use Stripe\Stripe as StripApi;
+use craft\helpers\Json;
 
 class ConnectController extends BaseController
 {
@@ -55,8 +54,39 @@ class ConnectController extends BaseController
             ]);
         }
 
-        $connectedAccount = Stripe::$plugin->connect->createConnectedAccount($code, $owner);
-        if(!Stripe::$plugin->connect->saveConnectedAccount($connectedAccount))
+        try {
+
+            $secretKey = Stripe::$plugin->getSettings()->getSecretKey();
+
+            $client = Craft::createGuzzleClient([
+                'base_uri' => 'https://connect.stripe.com/'
+            ]);
+
+            $response = $client->request('POST', 'oauth/token', [
+                'form_params' => [
+                    'client_secret' => $secretKey,
+                    'code' => $code,
+                    'grant_type' => 'authorization_code'
+                ]
+            ]);
+
+            $connectedAccount = Stripe::$plugin->connect->createConnectedAccount([
+                'ownerId' => $owner->id,
+                'settings' => Json::decode((string)$response->getBody()),
+            ]);
+
+        } catch (\Exception $e) {
+
+            return $this->handleFailedResponse([
+                'errors' => $e->getMessage(),
+                'redirect' => $redirect,
+                'handle' => 'connect'
+            ]);
+
+        }
+
+        $saved = Stripe::$plugin->connect->saveConnectedAccount($connectedAccount);
+        if(!$saved)
         {
             return $this->handleFailedResponse([
                 'errors' => $connectedAccount->getErrors(),

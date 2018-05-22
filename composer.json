@@ -7,13 +7,7 @@
         "craft",
         "cms",
         "craftcms",
-        "craft-plugin",
-        "stripe",
-        "follow",
-        "favourite",
-        "bookmark",
-        "like",
-        "subscribe"
+        "stripe"
     ],
     "support": {
         "docs": "https://github.com/fruitstudios/craft-stripe/blob/master/README.md",
