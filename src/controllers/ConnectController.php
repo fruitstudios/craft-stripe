@@ -2,6 +2,7 @@
 namespace fruitstudios\stripe\controllers;
 
 use fruitstudios\stripe\Stripe;
+use fruitstudios\stripe\controllers\BaseController;
 use fruitstudios\stripe\models\ConnectedAccount;
 use fruitstudios\stripe\services\Charges;
 
@@ -11,7 +12,7 @@ use craft\web\Controller;
 
 use Stripe\Stripe as StripApi;
 
-class ConnectController extends Controller
+class ConnectController extends BaseController
 {
 
     // Protected Properties
@@ -27,36 +28,48 @@ class ConnectController extends Controller
         $this->requireLogin();
 
         $request = Craft::$app->getRequest();
-        $code = $request->getParam('code', false);
-        $error = $request->getParam('error', false);
         $state = explode(',', $request->getParam('state', ''));
+        $code = $request->getParam('code', false);
 
-        $ownerId = (int) $state[0];
+        $redirect = $state[1] ?? Stripe::$plugin->getSettings()->connectAccountPath;
+
+        $error = $request->getParam('error', false);
+        if($error)
+        {
+            $errorDescription = $request->getParam('error_description', null);
+            return $this->handleFailedResponse([
+                'error' => $errorDescription ?? $error,
+                'redirect' => $redirect,
+                'handle' => 'connect'
+            ]);
+        }
+
+        $ownerId = $state[0] ?? false;
         $owner = $ownerId ? Craft::$app->getElements()->getElementById($ownerId) : Craft::$app->getUser()->getIdentity();
         if(!$owner instanceof Element)
         {
-            $error = 'Could not verify the account owner';
-        }
-
-        if($error)
-        {
-            return $this->_handleFailedResponse([
-                'error' => $error
-            ],
-            Stripe::$plugin->getSettings()->connectFailurePath);
+            return $this->handleFailedResponse([
+                'error' => 'Could not verify the account owner',
+                'redirect' => $redirect,
+                'handle' => 'connect'
+            ]);
         }
 
         $connectedAccount = Stripe::$plugin->connect->createConnectedAccount($code, $owner);
         if(!Stripe::$plugin->connect->saveConnectedAccount($connectedAccount))
         {
-            return $this->_handleFailedResponse([
-                'errors' => $connectedAccount->getErrors()
-            ], Stripe::$plugin->getSettings()->connectFailurePath);
+            return $this->handleFailedResponse([
+                'errors' => $connectedAccount->getErrors(),
+                'redirect' => $redirect,
+                'handle' => 'connect'
+            ]);
         }
 
-        return $this->_handleSuccessfulResponse([
-            'message' => 'Stripe Connected'
-        ], Stripe::$plugin->getSettings()->connectSuccessPath);
+        return $this->handleSuccessfulResponse([
+            'message' => 'Stripe Connected',
+            'redirect' => $redirect,
+            'handle' => 'connect'
+        ]);
     }
 
     public function actionDeAuthorization()
@@ -68,54 +81,21 @@ class ConnectController extends Controller
         $owner = (int) $request->getParam('ownerId', false);
         $owner = $ownerId ? Craft::$app->getElements()->getElementById($ownerId) : Craft::$app->getUser()->getIdentity();
 
+        $redirect = Stripe::$plugin->getSettings()->connectAccountPath;
+
         if(!Stripe::$plugin->connect->removeConnectedAccount($code, $owner))
         {
-            return $this->_handleFailedResponse( [
-                'errors' => $connectedAccount->getErrors()
-            ], Stripe::$plugin->getSettings()->connectFailurePath);
+            return $this->handleFailedResponse([
+                'errors' => $connectedAccount->getErrors(),
+                'redirect' => $redirect,
+                'handle' => 'connect'
+            ]);
         }
 
-        return $this->_handleSuccessfulResponse([
-            'message' => 'Stripe Disconnected'
-        ], Stripe::$plugin->getSettings()->connectSuccessPath);
-    }
-
-    // Private Methods
-    // =========================================================================
-
-    private function _handleSuccessfulResponse(array $result = [], string $redirect = null)
-    {
-        $result['success'] = true;
-        if (Craft::$app->getRequest()->getAcceptsJson())
-        {
-            return $this->asJson($result);
-        }
-
-        Craft::$app->getUrlManager()->setRouteParams([
-            'stripe' => $result
+        return $this->handleSuccessfulResponse([
+            'message' => 'Stripe Connected',
+            'redirect' => $redirect,
+            'handle' => 'connect'
         ]);
-
-        return $redirect ? $this->redirect($redirect) : $this->redirectToPostedUrl();
     }
-
-    private function _handleFailedResponse(array $result = [], string $redirect = null)
-    {
-        $result['success'] = false;
-        if (Craft::$app->getRequest()->getAcceptsJson())
-        {
-            return $this->asJson($result);
-        }
-
-        Craft::$app->getUrlManager()->setRouteParams([
-            'stripe' => $result
-        ]);
-
-        if($redirect)
-        {
-            return $this->redirect($redirect);
-        }
-
-        return null;
-    }
-
 }

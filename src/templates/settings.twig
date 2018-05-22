@@ -25,15 +25,6 @@
     errors: settings.getErrors('testPublishableKey') ?? null
 }) }}
 
-{{ forms.textField({
-    label: "Test Connect Client ID"|t('stripe'),
-    name: 'testConnectClientId',
-    placeholder: 'ca_XXXXXXXXXXXXXXXXXXXXXXXXX',
-    value: settings.testConnectClientId,
-    errors: settings.getErrors('testConnectClientId') ?? null
-}) }}
-
-
 <hr>
 
 {{ forms.textField({
@@ -52,6 +43,16 @@
     errors: settings.getErrors('livePublishableKey') ?? null
 }) }}
 
+<hr>
+
+{{ forms.textField({
+    label: "Test Connect Client ID"|t('stripe'),
+    name: 'testConnectClientId',
+    placeholder: 'ca_XXXXXXXXXXXXXXXXXXXXXXXXX',
+    value: settings.testConnectClientId,
+    errors: settings.getErrors('testConnectClientId') ?? null
+}) }}
+
 {{ forms.textField({
     label: "Live Connect Client ID"|t('stripe'),
     name: 'liveConnectClientId',
@@ -59,8 +60,6 @@
     value: settings.liveConnectClientId,
     errors: settings.getErrors('liveConnectClientId') ?? null
 }) }}
-
-<hr>
 
 {{ forms.textField({
     label: "Default Fee (%)"|t('stripe'),
@@ -72,17 +71,9 @@
 }) }}
 
 {{ forms.textField({
-    label: "Connect Success Path"|t('stripe'),
-    name: 'connectSuccessPath',
-    placeholder: 'ca_XXXXXXXXXXXXXXXXXXXXXXXXX',
-    value: settings.connectSuccessPath,
-    errors: settings.getErrors('connectSuccessPath') ?? null
-}) }}
-
-{{ forms.textField({
-    label: "Connect Failure Path"|t('stripe'),
-    name: 'connectFailurePath',
-    placeholder: 'ca_XXXXXXXXXXXXXXXXXXXXXXXXX',
-    value: settings.connectFailurePath,
-    errors: settings.getErrors('connectFailurePath') ?? null
+    label: "Account Path"|t('stripe'),
+    name: 'connectAccountPath',
+    placeholder: 'path/to/account',
+    value: settings.connectAccountPath ?? null,
+    errors: settings.getErrors('connectAccountPath') ?? null
 }) }}

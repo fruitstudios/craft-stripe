@@ -21,14 +21,13 @@ class Settings extends Model
 
     public $testSecretKey;
     public $testPublishableKey;
-    public $testConnectClientId;
 
     public $liveSecretKey;
     public $livePublishableKey;
-    public $liveConnectClientId;
 
-    public $connectSuccessPath;
-    public $connectFailurePath;
+    public $testConnectClientId;
+    public $liveConnectClientId;
+    public $connectAccountPath;
 
     public $fee = 0;
 
@@ -42,16 +41,16 @@ class Settings extends Model
                 [
                     'testSecretKey',
                     'testPublishableKey',
-                    'testConnectClientId',
                     'liveSecretKey',
                     'livePublishableKey',
+                    'testConnectClientId',
                     'liveConnectClientId',
-                    'connectSuccessPath',
-                    'connectFailurePath',
+                    'connectAccountPath',
                 ],
                 'string'
             ],
             [['liveSecretKey', 'livePublishableKey'], 'required', 'when' => [$this, 'isLiveMode']],
+            [['connectAccountPath'], 'required', 'when' => [$this, 'isConnectAvailable']],
             ['fee', 'double', 'min' => 0, 'max' => 99.99],
             ['fee', 'default', 'value' => 0],
             ['liveMode', 'boolean', 'trueValue' => 1, 'falseValue' => 0],
