@@ -65,7 +65,7 @@ class Settings extends Model
 
     public function isConnectAvailable()
     {
-        return (!$this->liveMode && $this->liveConnectClientId) || (!$this->liveMode && $this->testConnectClientId);
+        return ($this->liveMode && $this->liveConnectClientId) || (!$this->liveMode && $this->testConnectClientId);
     }
 
     public function getKeys()
