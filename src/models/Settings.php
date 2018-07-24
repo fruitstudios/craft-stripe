@@ -106,7 +106,7 @@ class Settings extends Model
         return (string) $this->fee.'%';
     }
 
-    public function getConnectOauthUrl(ElementInterface $owner)
+    public function getConnectOauthUrl(ElementInterface $owner, array $state = [])
     {
         $connectClientId = $this->getConnectClientId();
         if(!$connectClientId)
@@ -114,13 +114,18 @@ class Settings extends Model
             return '';
         }
 
+        $state = array_merge([
+            $owner->id
+        ], $state);
+
         return UrlHelper::urlWithParams(self::CONNECT_OAUTH_URL, [
             'response_type' => 'code',
             'client_id' => $connectClientId,
             'scope' => 'read_write',
             'redirect_uri' => UrlHelper::actionUrl(self::AUTH_PATH, null, 'https'),
-            'state' => $owner->id
+            'state' => implode(',', $state),
         ]);
     }
+
 
 }
