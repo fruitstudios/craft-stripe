@@ -100,7 +100,7 @@ class StripeHelper
     // Number
     //
 
-    public static function getPercentageValue($value, $percent, $round = false)
+    public static function getPercentageValue($value, $percent, $round = true)
     {
         $calculated = $value * ($percent / 100);
         return $round ? round($calculated, 0) : $calculated;
