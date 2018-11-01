@@ -15,6 +15,9 @@ use craft\helpers\Json;
 
 use GuzzleHttp\Client;
 
+use Stripe\Stripe as StripeApi;
+use Stripe\Account as StripeAccount;
+
 class Connect extends Component
 {
 
@@ -45,6 +48,16 @@ class Connect extends Component
             'ownerId' => $owner->id
         ]);
         return $this->_createConnectedAccount($connectedAccountRecord);
+    }
+
+    public function getConnectedAccountByOwnerId(int $ownerId)
+    {
+        $owner = Craft::$app->getElements()->getElementById($ownerId);
+        if(!$owner)
+        {
+            return false;
+        }
+        return $this->getConnectedAccountByOwner($owner);
     }
 
     public function saveConnectedAccount(ConnectedAccount $connectedAccount)
@@ -89,6 +102,12 @@ class Connect extends Component
             try {
 
                 $connectedAccountModel = $this->_createConnectedAccount($connectedAccountRecord);
+
+                if(!$this->deleteConnectedAccountInStripe($connectedAccountModel))
+                {
+                    return false;
+                }
+
                 $connectedAccountRecord->delete();
 
                 $this->trigger(self::EVENT_STRIPE_ACCOUNT_DISCONNECTED, new ConnectedAccountEvent([
@@ -105,6 +124,22 @@ class Connect extends Component
         }
 
         return true;
+    }
+
+    public function deleteConnectedAccountInStripe(ConnectedAccount $connectedAccount)
+    {
+        $secretKey = Stripe::$settings->getSecretKey();
+        if(!$secretKey)
+        {
+            return false;
+        }
+
+        StripeApi::setApiKey($secretKey);
+
+        $account = StripeAccount::retrieve($connectedAccount->getAccountId());
+        $response = $account->delete();
+
+        return $response['deleted'] ?? false;
     }
 
     // Private Methods

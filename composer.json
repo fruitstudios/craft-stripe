@@ -2,7 +2,7 @@
     "name": "fruitstudios/stripe",
     "description": "Developer tools for Stripe including Connected Accounts & simple charges.",
     "type": "craft-plugin",
-    "version": "1.0.5.1",
+    "version": "1.0.6",
     "keywords": [
         "craft",
         "cms",

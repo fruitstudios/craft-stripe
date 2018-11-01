@@ -107,23 +107,42 @@ class ConnectController extends BaseController
         $this->requireLogin();
 
         $request = Craft::$app->getRequest();
+        $currentUser = Craft::$app->getUser()->getIdentity();
 
-        $owner = (int) $request->getParam('ownerId', false);
-        $owner = $ownerId ? Craft::$app->getElements()->getElementById($ownerId) : Craft::$app->getUser()->getIdentity();
+        $ownerId = (int) $request->getParam('ownerId', false);
+        $connectedAccount = $ownerId ? Stripe::$plugin->connect->getConnectedAccountByOwnerId($ownerId) : false;
 
-        $redirect = Stripe::$plugin->getSettings()->connectAccountPath;
-
-        if(!Stripe::$plugin->connect->removeConnectedAccount($code, $owner))
+        // TODO: Add some permissions here to determine is the current user can remove other peoples accounts
+        //     : Currently using a temp check against current user (owner element will always be a user here)
+        if($currentUser->id != $ownerId)
         {
             return $this->handleFailedResponse([
-                'errors' => $connectedAccount->getErrors(),
+                'error' => 'Permission error',
+                'redirect' => $redirect,
+                'handle' => 'connect'
+            ]);
+        }
+
+        if(!$connectedAccount)
+        {
+            return $this->handleFailedResponse([
+                'error' => 'Invalid connected account',
+                'redirect' => $redirect,
+                'handle' => 'connect'
+            ]);
+        }
+
+        if(!Stripe::$plugin->connect->deleteConnectedAccount($connectedAccount))
+        {
+            return $this->handleFailedResponse([
+                'error' => 'Could not disconnect account',
                 'redirect' => $redirect,
                 'handle' => 'connect'
             ]);
         }
 
         return $this->handleSuccessfulResponse([
-            'message' => 'Stripe Connected',
+            'message' => 'Stripe Disconnected',
             'redirect' => $redirect,
             'handle' => 'connect'
         ]);
