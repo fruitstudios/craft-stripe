@@ -2,6 +2,12 @@
 >
 Developer tools for Stripe including Connected Accounts & simple charges for [Craft 3](http://craftcms.com)
 
+## 1.0.5.1 - 2018-11-01
+
+### Fixed
+
+*	Fixed name error
+
 ## 1.0.5 - 2018-11-01
 
 ### Added

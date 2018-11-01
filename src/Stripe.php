@@ -38,7 +38,7 @@ class Stripe extends Plugin
         parent::init();
 
         self::$plugin = $this;
-        self::$settings = Searchit::$plugin->getSettings();
+        self::$settings = Stripe::$plugin->getSettings();
 
         $this->setComponents([
             'charges' => Charges::class,
