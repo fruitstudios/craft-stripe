@@ -132,7 +132,7 @@ class ConnectController extends BaseController
             ]);
         }
 
-        if(!Stripe::$plugin->connect->deleteConnectedAccount($connectedAccount))
+        if(!Stripe::$plugin->connect->deleteConnectedAccount($connectedAccount->id))
         {
             return $this->handleFailedResponse([
                 'error' => 'Could not disconnect account',

@@ -2,6 +2,13 @@
 >
 Developer tools for Stripe including Connected Accounts & simple charges for [Craft 3](http://craftcms.com)
 
+## 1.0.6.2 - 2018-11-01
+
+### Fixed
+
+*	Fixed fee calculation
+*	Fixed disconnect account
+
 ## 1.0.6.1 - 2018-11-01
 
 ### Fixed
