@@ -7,7 +7,7 @@ Developer tools for Stripe including Connected Accounts & simple charges for [Cr
 ### Added
 
 *	Added an icon :)
-*	Added abosorb fees setting
+*	Added absorb fees setting
 
 ## 1.0.4 - 2018-10-09
 
