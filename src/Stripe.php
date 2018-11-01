@@ -22,6 +22,7 @@ class Stripe extends Plugin
     // =========================================================================
 
     public static $plugin;
+    public static $settings;
 
     // Public Properties
     // =========================================================================
@@ -37,6 +38,7 @@ class Stripe extends Plugin
         parent::init();
 
         self::$plugin = $this;
+        self::$settings = Searchit::$plugin->getSettings();
 
         $this->setComponents([
             'charges' => Charges::class,

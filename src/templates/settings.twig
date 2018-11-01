@@ -61,6 +61,8 @@
     errors: settings.getErrors('liveConnectClientId') ?? null
 }) }}
 
+<hr>
+
 {{ forms.textField({
     label: "Default Fee (%)"|t('stripe'),
     instructions: 'Set the default fee you are going to charge for connected account charges.'|t('stripe'),
@@ -68,6 +70,13 @@
     placeholder: '0',
     value: settings.fee,
     errors: settings.getErrors('fee') ?? null
+}) }}
+
+{{ forms.lightSwitchField({
+    label: "Absorb Stripe Fees"|t('stripe'),
+    instructions: 'Set whether the default fee should cover the cost of Stripe fees (@ 1.4% + 20p)'|t('stripe'),
+    name: 'absorbFees',
+    on: settings.absorbFees
 }) }}
 
 {{ forms.textField({

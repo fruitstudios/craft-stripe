@@ -1,8 +1,13 @@
 # Stripe Changelog
+>
+Developer tools for Stripe including Connected Accounts & simple charges for [Craft 3](http://craftcms.com)
 
-All notable changes to this project will be documented in this file.
+## 1.0.5 - 2018-11-01
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
+### Added
+
+*	Added an icon :)
+*	Added abosorb fees setting
 
 ## 1.0.4 - 2018-10-09
 

@@ -13,13 +13,18 @@ use Stripe\Charge as StripeCharge;
 
 class Charges extends Component
 {
+    // Constants
+    // =========================================================================
+
+    const STRIPE_FEE_PERCENT = 1.4;
+    const STRIPE_FEE_FLAT = 200;
 
     // Public Methods
     // =========================================================================
 
-    public function charge($charge, $connectedAccount = null)
+    public function charge(array $charge, $connectedAccount = null)
     {
-        $secretKey = Stripe::$plugin->getSettings()->getSecretKey();
+        $secretKey = Stripe::$settings->getSecretKey();
         if(!$secretKey)
         {
             return false;
@@ -29,8 +34,7 @@ class Charges extends Component
 
         if($connectedAccount)
         {
-            $feePercent = Stripe::$plugin->getSettings()->fee ?? 0;
-            $charge['application_fee'] = StripeHelper::getPercentageValue($charge['amount'], $feePercent);
+            $charge['application_fee'] = $this->getApplicationFee($charge);
 
             $payment = StripeCharge::create($charge, [
                 'stripe_account' => $connectedAccount->getAccountId()
@@ -42,6 +46,32 @@ class Charges extends Component
         }
 
         return $payment;
+    }
 
+    public function calculateApplicationFee(array $charge)
+    {
+        if(isset($charge['application_fee']))
+        {
+            return $charge['application_fee'];
+        }
+
+        $feePercent = Stripe::$settings->fee;
+        if($feePercent == 0)
+        {
+            return 0;
+        }
+
+        if(Stripe::$settings->absorbFees && $feePercent > self::STRIPE_FEE_PERCENT)
+        {
+            $feePercent = $feePercent - self::STRIPE_FEE_PERCENT;
+        }
+
+        $applicationFeeAmount = StripeHelper::getPercentageValue($charge['amount'], $feePercent);
+        if(Stripe::$settings->absorbFees)
+        {
+            $applicationFeeAmount = $applicationFeeAmount - self::STRIPE_FEE_FLAT;
+        }
+
+        return $applicationFeeAmount > 0 ? $applicationFeeAmount : 0;
     }
 }

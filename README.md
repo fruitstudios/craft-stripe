@@ -1,7 +1,9 @@
-# Stripe plugin for Craft CMS 3.x
+<p align="left"><a href="https://github.com/fruitstudios/craft-stripe" target="_blank"><img width="100" height="100" src="resources/img/stripe.svg" alt="Stripe"></a></p>
 
-Developer tools for Stripe inc Charges & Connected Accounts.
+# Stripe plugin for Craft CMS 3
 
-Docs coming soon...
+Developer tools for Stripe including Connected Accounts & simple charges.
+
+Full docs coming soon...
 
 Brought to you by [Fruit Studios](https://fruitstudios.co.uk)

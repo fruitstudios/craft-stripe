@@ -20,14 +20,11 @@ class BaseController extends Controller
 
         $redirect = $response['redirect'] ?? null;
 
-
-
         Craft::$app->getUrlManager()->setRouteParams(
             $this->_buildRouteParams($response)
         );
 
         return $this->redirectToPostedUrl(null, $redirect);
-        // return $redirect ? $this->redirect($redirect) : ;
     }
 
     protected function handleFailedResponse(array $response = [])

@@ -30,6 +30,7 @@ class Settings extends Model
     public $connectAccountPath;
 
     public $fee = 0;
+    public $absorbFees = false;
 
     // Public Methods
     // =========================================================================
@@ -54,7 +55,7 @@ class Settings extends Model
             ['fee', 'double', 'min' => 0, 'max' => 99.99],
             ['fee', 'default', 'value' => 0],
             ['liveMode', 'boolean', 'trueValue' => 1, 'falseValue' => 0],
-            ['liveMode', 'default', 'value' => false],
+            [['liveMode', 'absorbFees'], 'default', 'value' => false],
         ];
     }
 
@@ -103,7 +104,7 @@ class Settings extends Model
 
     public function getFeeString()
     {
-        return (string) $this->fee.'%';
+        return (string) $this->fee.'% ('.($this->absorbFees ? 'Including' : 'Excluding').' Stripe Fees)';
     }
 
     public function getConnectOauthUrl(ElementInterface $owner, array $state = [])
