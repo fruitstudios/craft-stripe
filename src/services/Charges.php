@@ -34,7 +34,7 @@ class Charges extends Component
 
         if($connectedAccount)
         {
-            $charge['application_fee'] = $this->getApplicationFee($charge);
+            $charge['application_fee'] = $this->calculateApplicationFee($charge);
 
             $payment = StripeCharge::create($charge, [
                 'stripe_account' => $connectedAccount->getAccountId()
