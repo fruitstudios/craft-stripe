@@ -108,6 +108,7 @@ class ConnectController extends BaseController
 
         $request = Craft::$app->getRequest();
         $currentUser = Craft::$app->getUser()->getIdentity();
+        $redirect = $request->getBodyParam('redirect', (Stripe::$plugin->getSettings()->connectAccountPath ?? '/'));
 
         $ownerId = (int) $request->getParam('ownerId', false);
         $connectedAccount = $ownerId ? Stripe::$plugin->connect->getConnectedAccountByOwnerId($ownerId) : false;
