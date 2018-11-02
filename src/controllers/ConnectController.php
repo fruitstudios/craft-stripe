@@ -30,7 +30,7 @@ class ConnectController extends BaseController
         $state = explode(',', $request->getParam('state', ''));
         $code = $request->getParam('code', false);
 
-        $redirect = $state[1] ?? Stripe::$plugin->getSettings()->connectAccountPath;
+        $redirect = $state[1] ?? Stripe::$settings->connectAccountPath;
 
         $error = $request->getParam('error', false);
         if($error)
@@ -38,7 +38,6 @@ class ConnectController extends BaseController
             $errorDescription = $request->getParam('error_description', null);
             return $this->handleFailedResponse([
                 'error' => $errorDescription ?? $error,
-                'redirect' => $redirect,
                 'handle' => 'connect'
             ]);
         }
@@ -49,19 +48,14 @@ class ConnectController extends BaseController
         {
             return $this->handleFailedResponse([
                 'error' => 'Could not verify the account owner',
-                'redirect' => $redirect,
                 'handle' => 'connect'
             ]);
         }
 
         try {
 
-            $secretKey = Stripe::$plugin->getSettings()->getSecretKey();
-
-            $client = Craft::createGuzzleClient([
-                'base_uri' => 'https://connect.stripe.com/'
-            ]);
-
+            $client = $this->_createStripeClient();
+            $secretKey = Stripe::$settings->getSecretKey();
             $response = $client->request('POST', 'oauth/token', [
                 'form_params' => [
                     'client_secret' => $secretKey,
@@ -79,7 +73,6 @@ class ConnectController extends BaseController
 
             return $this->handleFailedResponse([
                 'errors' => $e->getMessage(),
-                'redirect' => $redirect,
                 'handle' => 'connect'
             ]);
 
@@ -90,7 +83,6 @@ class ConnectController extends BaseController
         {
             return $this->handleFailedResponse([
                 'errors' => $connectedAccount->getErrors(),
-                'redirect' => $redirect,
                 'handle' => 'connect'
             ]);
         }
@@ -108,7 +100,6 @@ class ConnectController extends BaseController
 
         $request = Craft::$app->getRequest();
         $currentUser = Craft::$app->getUser()->getIdentity();
-        $redirect = $request->getBodyParam('redirect', (Stripe::$plugin->getSettings()->connectAccountPath ?? '/'));
 
         $ownerId = (int) $request->getParam('ownerId', false);
         $connectedAccount = $ownerId ? Stripe::$plugin->connect->getConnectedAccountByOwnerId($ownerId) : false;
@@ -119,8 +110,7 @@ class ConnectController extends BaseController
         {
             return $this->handleFailedResponse([
                 'error' => 'Permission error',
-                'redirect' => $redirect,
-                'handle' => 'connect'
+                'handle' => 'connect',
             ]);
         }
 
@@ -128,24 +118,62 @@ class ConnectController extends BaseController
         {
             return $this->handleFailedResponse([
                 'error' => 'Invalid connected account',
-                'redirect' => $redirect,
-                'handle' => 'connect'
+                'handle' => 'connect',
             ]);
         }
 
-        if(!Stripe::$plugin->connect->deleteConnectedAccount($connectedAccount->id))
+        if(!Stripe::$plugin->connect->deleteConnectedAccount($connectedAccount))
         {
             return $this->handleFailedResponse([
                 'error' => 'Could not disconnect account',
-                'redirect' => $redirect,
-                'handle' => 'connect'
+                'handle' => 'connect',
             ]);
+        }
+
+        try {
+
+            $client = $this->_createStripeClient();
+            $response = $client->request('POST', 'oauth/deauthorize', [
+                'form_params' => [
+                    'client_secret' => Stripe::$settings->getSecretKey(),
+                    'client_id' => Stripe::$settings->getConnectClientId(),
+                    'stripe_user_id' => $connectedAccount->getAccountId(),
+                ]
+            ]);
+
+            if($response->error ?? false)
+            {
+                return $this->handleFailedResponse([
+                    'error' => $response->error_description,
+                    'handle' => 'connect',
+                ]);
+            }
+
+        } catch (\Exception $e) {
+
+            return $this->handleFailedResponse([
+                'error' => 'Could not disconnect account',
+                'errors' => $e->getMessage(),
+                'handle' => 'connect',
+            ]);
+
         }
 
         return $this->handleSuccessfulResponse([
             'message' => 'Stripe Disconnected',
-            'redirect' => $redirect,
+            'redirect' => $request->getParam('redirect', Stripe::$settings->connectAccountPath ?? '/'),
             'handle' => 'connect'
         ]);
     }
+
+    // Public Methods
+    // =========================================================================
+
+    private function _createStripeClient()
+    {
+        return Craft::createGuzzleClient([
+            'base_uri' => 'https://connect.stripe.com/'
+        ]);
+    }
+
 }

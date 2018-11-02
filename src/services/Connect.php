@@ -94,52 +94,33 @@ class Connect extends Component
         return true;
     }
 
-    public function deleteConnectedAccount($connectedAccountId)
+    public function deleteConnectedAccount(ConnectedAccount $connectedAccount)
     {
-        $connectedAccountRecord = ConnectedAccountRecord::findOne($connectedAccountId);
-
-        if($connectedAccountRecord) {
+        $connectedAccountRecord = ConnectedAccountRecord::findOne($connectedAccount->id);
+        if($connectedAccountRecord)
+        {
             try {
-
-                $connectedAccountModel = $this->_createConnectedAccount($connectedAccountRecord);
-
-                if(!$this->deleteConnectedAccountInStripe($connectedAccountModel))
-                {
-                    return false;
-                }
 
                 $connectedAccountRecord->delete();
 
                 $this->trigger(self::EVENT_STRIPE_ACCOUNT_DISCONNECTED, new ConnectedAccountEvent([
-                    'connectedAccount' => $connectedAccountModel
+                    'connectedAccount' => $connectedAccount
                 ]));
+
+                return true;
 
             } catch (\StaleObjectException $e) {
                 Craft::error($e->getMessage(), __METHOD__);
+                return false;
             } catch (\Exception $e) {
                 Craft::error($e->getMessage(), __METHOD__);
+                return false;
             } catch (\Throwable $e) {
                 Craft::error($e->getMessage(), __METHOD__);
+                return false;
             }
         }
 
-        return true;
-    }
-
-    public function deleteConnectedAccountInStripe(ConnectedAccount $connectedAccount)
-    {
-        $secretKey = Stripe::$settings->getSecretKey();
-        if(!$secretKey)
-        {
-            return false;
-        }
-
-        StripeApi::setApiKey($secretKey);
-
-        $account = StripeAccount::retrieve($connectedAccount->getAccountId());
-        $response = $account->delete();
-
-        return $response['deleted'] ?? false;
     }
 
     // Private Methods
@@ -164,7 +145,4 @@ class Connect extends Component
         $connectedAccount = new ConnectedAccount($config);
         return $connectedAccount;
     }
-
-
-
 }

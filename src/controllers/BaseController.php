@@ -19,12 +19,16 @@ class BaseController extends Controller
         }
 
         $redirect = $response['redirect'] ?? null;
+        if($redirect)
+        {
+            return $this->redirect($redirect);
+        }
 
         Craft::$app->getUrlManager()->setRouteParams(
             $this->_buildRouteParams($response)
         );
 
-        return $this->redirectToPostedUrl(null, $redirect);
+        return null;
     }
 
     protected function handleFailedResponse(array $response = [])
@@ -39,15 +43,6 @@ class BaseController extends Controller
             $this->_buildRouteParams($response)
         );
 
-        $redirect = $response['redirect'] ?? null;
-
-        return $this->redirectToPostedUrl(null, $redirect);
-
-        if($redirect)
-        {
-            return $this->redirect($redirect);
-        }
-
         return null;
     }
 
@@ -57,6 +52,7 @@ class BaseController extends Controller
         $handle = $response['handle'] ?? false;
         if($handle)
         {
+            unset($response['handle'], $response['redirect']);
             $response = [
                 $handle => $response
             ];
