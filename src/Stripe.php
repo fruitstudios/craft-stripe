@@ -29,6 +29,7 @@ class Stripe extends Plugin
 
     public $schemaVersion = '1.0.0';
     public $hasCpSettings = true;
+    public $hasCpSection = true;
 
     // Public Methods
     // =========================================================================

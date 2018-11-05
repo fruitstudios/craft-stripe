@@ -2,11 +2,17 @@
 >
 Developer tools for Stripe including Connected Accounts & simple charges for [Craft 3](http://craftcms.com)
 
+## 1.0.8 - 2018-11-05
+
+### Added
+
+*	Added permission setting
+
 ## 1.0.7 - 2018-11-02
 
 ### Fixed
 
-*	FActually fixed redirect stuff
+*	Actually fixed redirect stuff
 
 ## 1.0.6.3 - 2018-11-01
 

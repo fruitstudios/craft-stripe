@@ -2,7 +2,7 @@
     "name": "fruitstudios/stripe",
     "description": "Developer tools for Stripe including Connected Accounts & simple charges.",
     "type": "craft-plugin",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "keywords": [
         "craft",
         "cms",
@@ -33,11 +33,11 @@
         "name": "Stripe",
         "handle": "stripe",
         "hasCpSettings": true,
-        "hasCpSection": false,
+        "hasCpSection": true,
         "changelogUrl": "https://raw.githubusercontent.com/fruitstudios/craft-stripe/master/CHANGELOG.md",
         "components": {
-            "listService": "fruitstudios\\stripe\\services\\ListService",
-            "subscriptionService": "fruitstudios\\stripe\\services\\SubscriptionService"
+            "chargesService": "fruitstudios\\stripe\\services\\Charges",
+            "connectService": "fruitstudios\\stripe\\services\\Connect"
         },
         "class": "fruitstudios\\stripe\\Stripe"
     }
