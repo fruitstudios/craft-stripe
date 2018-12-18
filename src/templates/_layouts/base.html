@@ -1,0 +1,4 @@
+{% extends '_layouts/cp' %}
+{% do view.registerAssetBundle("fruitstudios\\stripe\\web\\assets\\stripe\\StripeAssetBundle") %}
+
+{% set title = ( title ?? 'Stripe' ) ~ ' ' %}

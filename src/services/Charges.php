@@ -62,6 +62,9 @@ class Charges extends Component
         }
 
         $applicationFeeAmount = StripeHelper::getPercentageValue($charge['amount'], $feePercent);
+        var_dump(self::STRIPE_FEE_FLAT);
+        var_dump(self::STRIPE_FEE_PERCENT);
+        var_dump($applicationFeeAmount);
         if(Stripe::$settings->absorbFees)
         {
             $stripeFeeAmount = self::STRIPE_FEE_FLAT + StripeHelper::getPercentageValue($charge['amount'], self::STRIPE_FEE_PERCENT);
@@ -71,6 +74,11 @@ class Charges extends Component
             }
         }
 
+        var_dump($applicationFeeAmount);
+        var_dump(Stripe::$settings->absorbFees);
+        var_dump($applicationFeeAmount > 0 ? $applicationFeeAmount : 0);
+
+        die;
         return $applicationFeeAmount > 0 ? $applicationFeeAmount : 0;
     }
 }

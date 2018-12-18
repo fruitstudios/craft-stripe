@@ -17,18 +17,17 @@ class Settings extends Model
     // Public Properties
     // =========================================================================
 
-    public $liveMode = false;
+    public $pluginNameOverride = 'Stripe';
+    public $hasCpSectionOverride = false;
 
+    public $liveMode = false;
     public $testSecretKey;
     public $testPublishableKey;
-
     public $liveSecretKey;
     public $livePublishableKey;
-
     public $testConnectClientId;
     public $liveConnectClientId;
     public $connectAccountPath;
-
     public $fee = 0;
     public $absorbFees = false;
 
@@ -38,6 +37,10 @@ class Settings extends Model
     public function rules()
     {
         return [
+            ['pluginNameOverride', 'string'],
+            ['pluginNameOverride', 'default', 'value' => 'Stripe'],
+            ['hasCpSectionOverride', 'boolean'],
+            ['hasCpSectionOverride', 'default', 'value' => false],
             [
                 [
                     'testSecretKey',

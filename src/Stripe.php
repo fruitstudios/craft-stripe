@@ -2,17 +2,20 @@
 namespace fruitstudios\stripe;
 
 use fruitstudios\stripe\models\Settings;
-use fruitstudios\stripe\services\Charges;
-use fruitstudios\stripe\services\Connect;
-use fruitstudios\stripe\variables\StripeVariable;
+use fruitstudios\stripe\plugin\Routes as StripeRoutes;
+use fruitstudios\stripe\plugin\Services as StripeServices;
+use fruitstudios\stripe\web\twig\CraftVariableBehavior;
 
 use Craft;
 use craft\base\Plugin;
 use craft\services\Plugins;
+use craft\services\Fields;
+use craft\services\UserPermissions;
+use craft\helpers\UrlHelper;
+use craft\events\RegisterComponentTypesEvent;
+use craft\events\RegisterUserPermissionsEvent;
 use craft\events\PluginEvent;
-use craft\web\UrlManager;
 use craft\web\twig\variables\CraftVariable;
-use craft\events\RegisterUrlRulesEvent;
 
 use yii\base\Event;
 
@@ -23,13 +26,19 @@ class Stripe extends Plugin
 
     public static $plugin;
     public static $settings;
+    public static $devMode;
+    public static $view;
 
     // Public Properties
     // =========================================================================
 
     public $schemaVersion = '1.0.0';
-    public $hasCpSettings = true;
-    public $hasCpSection = true;
+
+    // Traits
+    // =========================================================================
+
+    use StripeServices;
+    use StripeRoutes;
 
     // Public Methods
     // =========================================================================
@@ -40,29 +49,42 @@ class Stripe extends Plugin
 
         self::$plugin = $this;
         self::$settings = Stripe::$plugin->getSettings();
+        self::$devMode = Craft::$app->getConfig()->getGeneral()->devMode;
+        self::$view = Craft::$app->getView();
 
-        $this->setComponents([
-            'charges' => Charges::class,
-            'connect' => Connect::class,
-        ]);
+        $this->name = Stripe::$settings->pluginNameOverride;
+        $this->hasCpSection = Stripe::$settings->hasCpSectionOverride;
 
-        Event::on(
-            CraftVariable::class,
-            CraftVariable::EVENT_INIT,
-            function (Event $event) {
-                $variable = $event->sender;
-                $variable->set('stripe', StripeVariable::class);
-            }
-        );
+        $this->_setPluginComponents();
+        $this->_registerCpRoutes();
+        $this->_registerPermissions();
+        $this->_registerVariables();
 
-        Craft::info(
-            Craft::t(
-                'stripe',
-                '{name} plugin loaded',
-                ['name' => $this->name]
-            ),
-            __METHOD__
-        );
+        Craft::info(Craft::t('stripe', '{name} plugin loaded', ['name' => $this->name]), __METHOD__);
+    }
+
+    public function beforeInstall(): bool
+    {
+        return true;
+    }
+
+    public function afterInstallPlugin(PluginEvent $event)
+    {
+        $isCpRequest = Craft::$app->getRequest()->isCpRequest;
+        if ($event->plugin === $this && $isCpRequest)
+        {
+            Craft::$app->controller->redirect(UrlHelper::cpUrl('stripe/about'))->send();
+        }
+    }
+
+    public function getSettingsResponse()
+    {
+        return Craft::$app->controller->redirect(UrlHelper::cpUrl('stripe/settings/plugin'));
+    }
+
+    public function getGitHubUrl(string $append = '')
+    {
+        return 'https://github.com/fruitstudios/craft-'.$this->handle.$append;
     }
 
     // Protected Methods
@@ -73,11 +95,28 @@ class Stripe extends Plugin
         return new Settings();
     }
 
-    protected function settingsHtml()
+    // Private Methods
+    // =========================================================================
+
+    private function _registerPermissions()
     {
-        return Craft::$app->getView()->renderTemplate('stripe/settings', [
-            'settings' => $this->getSettings()
-        ]);
+        Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function(RegisterUserPermissionsEvent $event) {
+
+             $event->permissions[Craft::t('stripe', 'Stripe')] = [
+                'stripe-updatePluginSettings' => ['label' => Craft::t('stripe', 'Update Plugin Settings')],
+                'stripe-updateStripeSettings' => ['label' => Craft::t('stripe', 'Update Stripe Settings')],
+            ];
+
+        });
+    }
+
+    private function _registerVariables()
+    {
+        Event::on(CraftVariable::class, CraftVariable::EVENT_INIT, function(Event $event) {
+            /** @var CraftVariable $variable */
+            $variable = $event->sender;
+            $variable->attachBehavior('stripe', CraftVariableBehavior::class);
+        });
     }
 
 }

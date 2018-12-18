@@ -1,0 +1,30 @@
+{% extends "stripe/_layouts/base" %}
+
+{% set title = "Stripe"|t('stripe') %}
+
+
+{% set navItems = {
+    'settings/stripe': craft.app.user.checkPermission('stripe-updateStripeSettings') ? { title: "Stripe"|t('stripe') } : false,
+    'settings': craft.app.user.checkPermission('stripe-updatePluginSettings') ? { heading: "Plugin"|t('stripe') } : false,
+    'settings/plugin': craft.app.user.checkPermission('stripe-updatePluginSettings') ? { title: "Settings"|t('stripe') } : false,
+    'about': craft.app.user.checkPermission('stripe-updatePluginSettings') ? { title: "About"|t('stripe') } : false,
+} %}
+
+{% set selectedItemHandle = selectedItem ?? craft.app.request.getSegment(2)~(craft.app.request.getSegment(3) ? '/'~craft.app.request.getSegment(3)) %}
+{% set docTitle = ((navItems[selectedItemHandle] ?? false) ? navItems[selectedItemHandle].title ~' - ')~title %}
+
+{% block sidebar %}
+    <nav>
+        <ul>
+            {% for handle, item in navItems if item %}
+                {% if item.heading is defined %}
+                    <li class="heading"><span>{{ item.heading }}</span></li>
+                {% else %}
+                    <li>
+                        <a href="{{ url('stripe/'~handle) }}"{% if handle == selectedItemHandle %} class="sel"{% endif %}>{{ item.title }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </nav>
+{% endblock %}
